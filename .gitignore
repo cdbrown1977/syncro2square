@@ -1,0 +1,5 @@
+config.php
+logs/*.log
+data/*.json
+!data/.gitkeep
+!logs/.gitkeep

@@ -1,0 +1,17 @@
+Syncro to Square Invoice Sync
+Version 1.0.0
+Release Date: February 5, 2026
+
+Tested and working with:
+- WAMP Server 3.4.0
+- Apache 2.4.65
+- PHP 8.3.28
+- MySQL 8.4.7 / MariaDB 11.4.9
+
+Features:
+- Automatic invoice syncing from Syncro MSP to Square
+- Customer lookup by email (prevents duplicates)
+- Multiple line items support
+- Draft invoice creation
+- Comprehensive logging
+- Duplicate prevention
