@@ -3,291 +3,406 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Syncro to Square Invoice Sync</title>
+    <title>Syncro2Square - Invoice Sync</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            color: #333;
             min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 24px 32px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 20px;
+            gap: 16px;
         }
-        
-        .container {
+        .header h1 { font-size: 24px; font-weight: 600; }
+        .header .subtitle { opacity: 0.85; font-size: 14px; margin-top: 2px; }
+        .header .back-link {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            font-size: 14px;
+            margin-left: auto;
+        }
+        .header .back-link:hover { color: white; }
+
+        .tabs {
+            display: flex;
+            background: white;
+            border-bottom: 2px solid #e5e7eb;
+            padding: 0 32px;
+        }
+        .tab {
+            padding: 14px 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+        .tab:hover { color: #667eea; }
+        .tab.active { color: #667eea; border-bottom-color: #667eea; }
+
+        .content { max-width: 1000px; margin: 24px auto; padding: 0 24px; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        .card {
             background: white;
             border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            padding: 40px;
-            max-width: 600px;
-            width: 100%;
-        }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 28px;
-        }
-        
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-        
-        .card {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            padding: 24px;
             margin-bottom: 20px;
         }
-        
-        button {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 6px;
+        .card h2 {
             font-size: 16px;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 16px;
+            color: #111;
         }
-        
-        button:hover {
-            background: #5568d3;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
         }
-        
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
+        .stat-box {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
         }
-        
-        .input-group {
-            margin-bottom: 15px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
+        .stat-box .value { font-size: 28px; font-weight: 700; color: #667eea; }
+        .stat-box .label { font-size: 12px; color: #6b7280; margin-top: 4px; text-transform: uppercase; }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
             font-weight: 500;
-            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
-        
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-        
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        #output {
-            background: #1e1e1e;
-            color: #00ff00;
-            padding: 20px;
-            border-radius: 6px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5568d3; }
+        .btn-primary:disabled { background: #b4bfee; cursor: not-allowed; }
+        .btn-secondary { background: #e5e7eb; color: #374151; }
+        .btn-secondary:hover { background: #d1d5db; }
+
+        .btn-group { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+
+        .output {
+            background: #1e1e2e;
+            color: #cdd6f4;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 12px;
+            line-height: 1.6;
             max-height: 400px;
             overflow-y: auto;
             white-space: pre-wrap;
-            word-wrap: break-word;
-            display: none;
+            word-break: break-all;
         }
-        
-        #output.show {
-            display: block;
+        .output:empty::before {
+            content: 'Output will appear here...';
+            color: #585b70;
         }
-        
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
-        
-        .loading.show {
-            display: block;
-        }
-        
+        .output .error { color: #f38ba8; }
+        .output .success { color: #a6e3a1; }
+        .output .info { color: #89b4fa; }
+
         .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .status-badge {
             display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-left: 10px;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
         }
-        
-        .status-success {
-            background: #d4edda;
-            color: #155724;
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .test-results {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
         }
-        
-        .status-error {
-            background: #f8d7da;
-            color: #721c24;
+        .test-result {
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
         }
+        .test-result.pending { background: #f9fafb; color: #6b7280; }
+        .test-result.success { background: #ecfdf5; color: #059669; }
+        .test-result.error { background: #fef2f2; color: #dc2626; }
+
+        .last-sync { font-size: 13px; color: #6b7280; margin-bottom: 12px; }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: end;
+            margin-bottom: 16px;
+        }
+        .input-row .field { flex: 1; }
+        .input-row label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 4px;
+        }
+        .input-row input {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .input-row input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 2px rgba(102,126,234,0.15); }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>📄 Invoice Sync Dashboard</h1>
-        <p class="subtitle">Syncro MSP → Square</p>
-        
-        <div class="card">
-            <h3 style="margin-bottom: 15px; color: #333;">Quick Actions</h3>
-            
-            <button onclick="syncAll()" id="syncAllBtn">
-                🔄 Sync All New Invoices
-            </button>
-            
-            <div class="input-group">
-                <label for="invoiceId">Or sync specific invoice:</label>
-                <input type="text" id="invoiceId" placeholder="Enter Syncro Invoice ID">
-            </div>
-            
-            <button onclick="syncSpecific()" id="syncSpecificBtn">
-                📋 Sync This Invoice
-            </button>
+    <div class="header">
+        <div>
+            <h1>Syncro2Square</h1>
+            <div class="subtitle">Sync Syncro MSP invoices to Square</div>
         </div>
-        
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Syncing invoices...</p>
-        </div>
-        
-        <div id="output"></div>
+        <a href="/" class="back-link">Back to Dashboard</a>
     </div>
-    
+
+    <div class="tabs">
+        <div class="tab active" data-tab="sync">Sync</div>
+        <div class="tab" data-tab="logs">Logs</div>
+    </div>
+
+    <div class="content">
+        <!-- Sync Tab -->
+        <div class="tab-panel active" id="tab-sync">
+            <div class="card">
+                <h2>Sync Status</h2>
+                <div class="last-sync" id="lastSyncTime">Last sync: Never</div>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="value" id="statSynced">-</div>
+                        <div class="label">Invoices Synced</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Connection Tests</h2>
+                <div class="test-results">
+                    <div class="test-result pending" id="testSyncro">Syncro API: Not tested</div>
+                    <div class="test-result pending" id="testSquare">Square API: Not tested</div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="testConnection('syncro')">Test Syncro</button>
+                    <button class="btn btn-secondary" onclick="testConnection('square')">Test Square</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Sync Invoices</h2>
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="syncAllBtn" onclick="syncAll()">
+                        Sync All New Invoices
+                    </button>
+                </div>
+
+                <div class="input-row">
+                    <div class="field">
+                        <label for="invoiceId">Sync specific invoice:</label>
+                        <input type="text" id="invoiceId" placeholder="Enter Syncro Invoice ID">
+                    </div>
+                    <button class="btn btn-secondary" id="syncSpecificBtn" onclick="syncSpecific()">Sync This Invoice</button>
+                </div>
+
+                <div class="output" id="syncOutput"></div>
+            </div>
+        </div>
+
+        <!-- Logs Tab -->
+        <div class="tab-panel" id="tab-logs">
+            <div class="card">
+                <h2>Recent Logs</h2>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="loadLogs()">Refresh Logs</button>
+                </div>
+                <div class="output" id="logsOutput"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        const output = document.getElementById('output');
-        const loading = document.getElementById('loading');
-        
-        function log(message, type = 'info') {
-            const timestamp = new Date().toLocaleTimeString();
-            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : '📝';
-            output.textContent += `[${timestamp}] ${prefix} ${message}\n`;
-            output.scrollTop = output.scrollHeight;
+        const API_URL = 'sync_api.php';
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+                if (tab.dataset.tab === 'logs') loadLogs();
+            });
+        });
+
+        // API helper
+        async function apiCall(action, data = {}) {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action, ...data }),
+            });
+            return res.json();
         }
-        
-        function showLoading() {
-            loading.classList.add('show');
-            output.classList.add('show');
-            output.textContent = '';
-            document.getElementById('syncAllBtn').disabled = true;
-            document.getElementById('syncSpecificBtn').disabled = true;
-        }
-        
-        function hideLoading() {
-            loading.classList.remove('show');
-            document.getElementById('syncAllBtn').disabled = false;
-            document.getElementById('syncSpecificBtn').disabled = false;
-        }
-        
-        async function syncAll() {
-            showLoading();
-            log('Starting sync of all new invoices...');
-            
+
+        // Load status
+        async function loadStatus() {
             try {
-                const response = await fetch('sync_api.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ action: 'sync_all' })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    log(result.message, 'success');
-                    if (result.details) {
-                        result.details.forEach(detail => log(detail));
+                const res = await apiCall('status');
+                if (res.success) {
+                    const d = res.data;
+                    document.getElementById('statSynced').textContent = d.total_synced;
+                    document.getElementById('lastSyncTime').textContent =
+                        d.last_sync ? 'Last sync: ' + d.last_sync : 'Last sync: Never';
+                }
+            } catch (e) {
+                console.error('Failed to load status:', e);
+            }
+        }
+
+        // Test connection
+        async function testConnection(type) {
+            const el = document.getElementById(type === 'syncro' ? 'testSyncro' : 'testSquare');
+            const label = type === 'syncro' ? 'Syncro API' : 'Square API';
+            el.className = 'test-result pending';
+            el.textContent = label + ': Testing...';
+
+            try {
+                const res = await apiCall(type === 'syncro' ? 'test_syncro' : 'test_square');
+                if (res.success) {
+                    el.className = 'test-result success';
+                    el.textContent = label + ': Connected';
+                    if (res.data) {
+                        const detail = type === 'syncro'
+                            ? ` (${res.data.invoice_count} invoices)`
+                            : ` (${res.data.location_count} locations)`;
+                        el.textContent += detail;
                     }
                 } else {
-                    log(result.message, 'error');
+                    el.className = 'test-result error';
+                    el.textContent = label + ': ' + (res.message || 'Failed');
                 }
-            } catch (error) {
-                log('Error: ' + error.message, 'error');
+            } catch (e) {
+                el.className = 'test-result error';
+                el.textContent = label + ': Error - ' + e.message;
             }
-            
-            hideLoading();
         }
-        
+
+        // Sync all
+        async function syncAll() {
+            const btn = document.getElementById('syncAllBtn');
+            const output = document.getElementById('syncOutput');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Syncing...';
+            output.textContent = 'Starting sync of all new invoices...\n';
+
+            try {
+                const res = await apiCall('sync_all');
+                if (res.log) {
+                    output.innerHTML = colorizeLog(res.log);
+                }
+                if (res.success) {
+                    output.innerHTML += '\n<span class="success">' + escapeHtml(res.message) + '</span>';
+                } else {
+                    output.innerHTML += '\n<span class="error">' + escapeHtml(res.message) + '</span>';
+                }
+                loadStatus();
+            } catch (e) {
+                output.innerHTML += '<span class="error">Error: ' + escapeHtml(e.message) + '</span>';
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = 'Sync All New Invoices';
+        }
+
+        // Sync specific
         async function syncSpecific() {
             const invoiceId = document.getElementById('invoiceId').value.trim();
-            
-            if (!invoiceId) {
-                alert('Please enter an invoice ID');
-                return;
-            }
-            
-            showLoading();
-            log(`Starting sync of invoice ${invoiceId}...`);
-            
+            if (!invoiceId) { alert('Please enter an invoice ID'); return; }
+
+            const btn = document.getElementById('syncSpecificBtn');
+            const output = document.getElementById('syncOutput');
+            btn.disabled = true;
+            output.textContent = 'Syncing invoice ' + invoiceId + '...\n';
+
             try {
-                const response = await fetch('sync_api.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ 
-                        action: 'sync_specific',
-                        invoice_id: invoiceId
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    log(result.message, 'success');
-                    if (result.details) {
-                        result.details.forEach(detail => log(detail));
+                const res = await apiCall('sync_specific', { invoice_id: invoiceId });
+                if (res.log) {
+                    output.innerHTML = colorizeLog(res.log);
+                }
+                if (res.success) {
+                    output.innerHTML += '\n<span class="success">' + escapeHtml(res.message) + '</span>';
+                    if (res.square_invoice) {
+                        output.innerHTML += '\n<span class="success">Square Invoice: ' + escapeHtml(res.square_invoice) + '</span>';
                     }
                 } else {
-                    log(result.message, 'error');
+                    output.innerHTML += '\n<span class="error">' + escapeHtml(res.message) + '</span>';
                 }
-            } catch (error) {
-                log('Error: ' + error.message, 'error');
+                loadStatus();
+            } catch (e) {
+                output.innerHTML += '<span class="error">Error: ' + escapeHtml(e.message) + '</span>';
             }
-            
-            hideLoading();
+
+            btn.disabled = false;
         }
+
+        // Load logs
+        async function loadLogs() {
+            const output = document.getElementById('logsOutput');
+            output.textContent = 'Loading logs...';
+            try {
+                const res = await apiCall('get_logs');
+                if (res.success) {
+                    output.innerHTML = colorizeLog(res.data);
+                }
+            } catch (e) {
+                output.innerHTML = '<span class="error">Error loading logs: ' + escapeHtml(e.message) + '</span>';
+            }
+        }
+
+        // Colorize log output
+        function colorizeLog(text) {
+            return escapeHtml(text)
+                .replace(/\[ERROR\]/g, '<span class="error">[ERROR]</span>')
+                .replace(/\[SUCCESS\]/g, '<span class="success">[SUCCESS]</span>')
+                .replace(/\[INFO\]/g, '<span class="info">[INFO]</span>');
+        }
+
+        // Escape HTML
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // Init
+        loadStatus();
     </script>
 </body>
 </html>
